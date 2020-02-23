@@ -24,7 +24,7 @@ E_UNSUPPORTED_PYTHON = '%s 1.0 requires %%s %%s or later!' % (NAME,)
 PYIMP = _pyimp()
 PY26_OR_LESS = sys.version_info < (2, 7)
 PY3 = sys.version_info[0] == 3
-PY33_OR_LESS = PY3 and sys.version_info < (3, 4)
+PY33_OR_LESS = PY3 and sys.version_info < (3, 5)
 PYPY_VERSION = getattr(sys, 'pypy_version_info', None)
 PYPY = PYPY_VERSION is not None
 PYPY24_ATLEAST = PYPY_VERSION and PYPY_VERSION >= (2, 4)
@@ -32,7 +32,7 @@ PYPY24_ATLEAST = PYPY_VERSION and PYPY_VERSION >= (2, 4)
 if PY26_OR_LESS:
     raise Exception(E_UNSUPPORTED_PYTHON % (PYIMP, '2.7'))
 elif PY33_OR_LESS and not PYPY24_ATLEAST:
-    raise Exception(E_UNSUPPORTED_PYTHON % (PYIMP, '3.4'))
+    raise Exception(E_UNSUPPORTED_PYTHON % (PYIMP, '3.5'))
 
 # -*- Classifiers -*-
 
@@ -40,19 +40,16 @@ classes = """
     Development Status :: 5 - Production/Stable
     License :: OSI Approved :: BSD License
     Programming Language :: Python
-    Programming Language :: Python :: 2
-    Programming Language :: Python :: 2.7
     Programming Language :: Python :: 3
-    Programming Language :: Python :: 3.4
     Programming Language :: Python :: 3.5
+    Programming Language :: Python :: 3.6
+    Programming Language :: Python :: 3.7
+    Programming Language :: Python :: 3.8
     Programming Language :: Python :: Implementation :: CPython
     Programming Language :: Python :: Implementation :: PyPy
     Framework :: Django
-    Framework :: Django :: 1.8
-    Framework :: Django :: 1.9
-    Framework :: Django :: 1.10
-    Framework :: Django :: 1.11
-    Framework :: Django :: 2.0
+    Framework :: Django :: 2.2
+    Framework :: Django :: 3.0
     Operating System :: OS Independent
     Topic :: Communications
     Topic :: System :: Distributed Computing
@@ -140,13 +137,14 @@ setuptools.setup(
     version=meta['version'],
     description=meta['doc'],
     long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='django celery beat periodic task database',
     author=meta['author'],
     author_email=meta['contact'],
     url=meta['homepage'],
     platforms=['any'],
     license='BSD',
-    install_requires=reqs('default.txt'),
+    install_requires=reqs('default.txt') + reqs('runtime.txt'),
     tests_require=reqs('test.txt') + reqs('test-django.txt'),
     cmdclass={'test': pytest},
     classifiers=classifiers,

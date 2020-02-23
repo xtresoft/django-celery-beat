@@ -4,7 +4,7 @@
 
 |build-status| |coverage| |license| |wheel| |pyversion| |pyimp|
 
-:Version: 1.1.1
+:Version: 1.6.0
 :Web: http://django-celery-beat.readthedocs.io/
 :Download: http://pypi.python.org/pypi/django-celery-beat
 :Source: http://github.com/celery/django-celery-beat
@@ -159,7 +159,7 @@ Example creating crontab-based periodic task
 --------------------------------------------
 
 A crontab schedule has the fields: ``minute``, ``hour``, ``day_of_week``,
-``day_of_month`` and ``month_of_year`, so if you want the equivalent
+``day_of_month`` and ``month_of_year``, so if you want the equivalent
 of a ``30 * * * *`` (execute every 30 minutes) crontab entry you specify::
 
     >>> from django_celery_beat.models import CrontabSchedule, PeriodicTask
@@ -192,13 +192,52 @@ You can use the ``enabled`` flag to temporarily disable a periodic task::
     >>> periodic_task.enabled = False
     >>> periodic_task.save()
 
+
+Example running periodic tasks
+-----------------------------------
+
+The periodic tasks still need 'workers' to execute them.
+So make sure the default **Celery** package is installed.
+(If not installed, please follow the installation instructions
+here: https://github.com/celery/celery)
+
+Both the worker and beat services need to be running at the same time.
+
+1. Start a Celery worker service (specify your Django project name)::
+
+
+    $ celery -A [project-name] worker --loglevel=info
+
+
+2. As a separate process, start the beat service (specify the Django scheduler)::
+
+
+        $ celery -A [project-name] beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+
+
+   **OR** you can use the -S (scheduler flag), for more options see ``celery beat --help``)::
+
+            $ celery -A [project-name] beat -l info -S django
+
+   Also, as an alternative, you can run the two steps above (worker and beat services)
+   with only one command (recommended for **development environment only**)::
+
+
+    $ celery -A [project-name] worker --beat --scheduler django --loglevel=info
+
+
+3. Now you can add and manage your periodic tasks from the Django Admin interface.
+
+
+
+
 Installation
 ============
 
 You can install django-celery-beat either via the Python Package Index (PyPI)
 or from source.
 
-To install using `pip`,::
+To install using ``pip``::
 
     $ pip install -U django-celery-beat
 
@@ -218,6 +257,17 @@ You can install it by doing the following,::
 The last command must be executed as a privileged user if
 you are not currently using a virtualenv.
 
+
+After installation, add ``django_celery_beat`` to Django settings file::
+
+    INSTALLED_APPS = [
+        ...,
+        'django_celery_beat',
+    ]
+
+    python manage.py migrate django_celery_beat
+
+
 Using the development version
 -----------------------------
 
@@ -228,6 +278,23 @@ You can install the latest snapshot of django-celery-beat using the following
 pip command::
 
     $ pip install https://github.com/celery/django-celery-beat/zipball/master#egg=django-celery-beat
+
+
+Developing django-celery-beat
+-----------------------------
+
+To spin up a local development copy of django-celery-beat with Django admin at http://127.0.0.1:58000/admin/ run::
+
+    $ docker-compose up --build
+
+Log-in as user ``admin`` with password ``admin``.
+
+
+TZ Awareness:
+-------------
+
+If you have a project that is time zone naive, you can set ``DJANGO_CELERY_BEAT_TZ_AWARE=False`` in your settings file.
+
 
 .. |build-status| image:: https://secure.travis-ci.org/celery/django-celery-beat.svg?branch=master
     :alt: Build status
@@ -252,3 +319,7 @@ pip command::
     :alt: Support Python implementations.
     :target: http://pypi.python.org/pypi/django-celery-beat/
 
+django-celery-beat as part of the Tidelift Subscription
+-------------
+
+The maintainers of django-celery-beat and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source dependencies you use to build your applications. Save time, reduce risk, and improve code health, while paying the maintainers of the exact dependencies you use. [Learn more.](https://tidelift.com/subscription/pkg/pypi-django-celery-beat?utm_source=pypi-django-celery-beat&utm_medium=referral&utm_campaign=readme&utm_term=repo)

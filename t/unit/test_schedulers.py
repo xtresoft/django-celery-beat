@@ -1,22 +1,25 @@
-from __future__ import absolute_import, unicode_literals
-
+import math
+import os
+import time
 import pytest
 
 from datetime import datetime, timedelta
 from itertools import count
+from time import monotonic
 
 from django.contrib.admin.sites import AdminSite
 from django.contrib.messages.storage.fallback import FallbackStorage
-from django.test import RequestFactory
+from django.test import RequestFactory, override_settings
+from django.utils import timezone
 
-from celery.five import monotonic, text_t
 from celery.schedules import schedule, crontab, solar
 
 from django_celery_beat import schedulers
+from django_celery_beat.clockedschedule import clocked
 from django_celery_beat.admin import PeriodicTaskAdmin
 from django_celery_beat.models import (
     PeriodicTask, PeriodicTasks, IntervalSchedule, CrontabSchedule,
-    SolarSchedule
+    SolarSchedule, ClockedSchedule, DAYS
 )
 from django_celery_beat.utils import make_aware
 
@@ -76,6 +79,11 @@ class SchedulerCase:
         solar.save()
         return self.create_model(solar=solar, **kwargs)
 
+    def create_model_clocked(self, schedule, **kwargs):
+        clocked = ClockedSchedule.from_schedule(schedule)
+        clocked.save()
+        return self.create_model(clocked=clocked, one_off=True, **kwargs)
+
     def create_conf_entry(self):
         name = 'thefoo{0}'.format(next(_ids))
         return name, dict(
@@ -95,9 +103,14 @@ class SchedulerCase:
             kwargs='{"callback": "foo"}',
             queue='xaz',
             routing_key='cpu',
+            priority=1,
+            headers='{"_schema_name": "foobar"}',
             exchange='foo',
         )
         return Model(**dict(entry, **kwargs))
+
+    def create_interval_schedule(self):
+        return IntervalSchedule.objects.create(every=10, period=DAYS)
 
 
 @pytest.mark.django_db()
@@ -116,6 +129,8 @@ class test_ModelEntry(SchedulerCase):
         assert e.options['queue'] == 'xaz'
         assert e.options['exchange'] == 'foo'
         assert e.options['routing_key'] == 'cpu'
+        assert e.options['priority'] == 1
+        assert e.options['headers'] == {'_schema_name': 'foobar'}
 
         right_now = self.app.now()
         m2 = self.create_model_interval(
@@ -131,6 +146,116 @@ class test_ModelEntry(SchedulerCase):
         assert e3.last_run_at > e2.last_run_at
         assert e3.total_run_count == 1
 
+    @override_settings(
+        USE_TZ=False,
+        DJANGO_CELERY_BEAT_TZ_AWARE=False
+    )
+    @pytest.mark.usefixtures('depends_on_current_app')
+    @timezone.override('Europe/Berlin')
+    @pytest.mark.celery(timezone='Europe/Berlin')
+    def test_entry_is_due__no_use_tz(self):
+        old_tz = os.environ.get("TZ")
+        os.environ["TZ"] = "Europe/Berlin"
+        if hasattr(time, "tzset"):
+            time.tzset()
+        assert self.app.timezone.zone == 'Europe/Berlin'
+
+        # simulate last_run_at from DB - not TZ aware but localtime
+        right_now = datetime.utcnow()
+
+        m = self.create_model_crontab(
+            crontab(minute='*/10'),
+            last_run_at=right_now,
+        )
+        e = self.Entry(m, app=self.app)
+
+        assert e.is_due().is_due is False
+        assert e.is_due().next <= 600  # 10 minutes; see above
+        if old_tz is not None:
+            os.environ["TZ"] = old_tz
+        else:
+            del os.environ["TZ"]
+        if hasattr(time, "tzset"):
+            time.tzset()
+
+    @override_settings(
+        USE_TZ=False,
+        DJANGO_CELERY_BEAT_TZ_AWARE=False,
+        TIME_ZONE="Europe/Berlin",
+        CELERY_TIMEZONE="America/New_York"
+    )
+    @pytest.mark.usefixtures('depends_on_current_app')
+    @timezone.override('Europe/Berlin')
+    @pytest.mark.celery(timezone='America/New_York')
+    def test_entry_is_due__celery_timezone_doesnt_match_time_zone(self):
+        old_tz = os.environ.get("TZ")
+        os.environ["TZ"] = "Europe/Berlin"
+        if hasattr(time, "tzset"):
+            time.tzset()
+        assert self.app.timezone.zone == 'America/New_York'
+
+        # simulate last_run_at all none, doing the same thing that
+        # _default_now() would do
+        right_now = datetime.utcnow()
+
+        m = self.create_model_crontab(
+            crontab(minute='*/10'),
+            last_run_at=right_now,
+        )
+        e = self.Entry(m, app=self.app)
+
+        assert e.is_due().is_due is False
+        assert e.is_due().next <= 600  # 10 minutes; see above
+        if old_tz is not None:
+            os.environ["TZ"] = old_tz
+        else:
+            del os.environ["TZ"]
+        if hasattr(time, "tzset"):
+            time.tzset()
+
+    def test_task_with_start_time(self):
+        interval = 10
+        right_now = self.app.now()
+        one_interval_ago = right_now - timedelta(seconds=interval)
+        m = self.create_model_interval(schedule(timedelta(seconds=interval)),
+                                       start_time=right_now,
+                                       last_run_at=one_interval_ago)
+        e = self.Entry(m, app=self.app)
+        isdue, delay = e.is_due()
+        assert isdue
+        assert delay == interval
+
+        tomorrow = right_now + timedelta(days=1)
+        m2 = self.create_model_interval(schedule(timedelta(seconds=interval)),
+                                        start_time=tomorrow,
+                                        last_run_at=one_interval_ago)
+        e2 = self.Entry(m2, app=self.app)
+        isdue, delay = e2.is_due()
+        assert not isdue
+        assert delay == math.ceil((tomorrow - right_now).total_seconds())
+
+    def test_one_off_task(self):
+        interval = 10
+        right_now = self.app.now()
+        one_interval_ago = right_now - timedelta(seconds=interval)
+        m = self.create_model_interval(schedule(timedelta(seconds=interval)),
+                                       one_off=True,
+                                       last_run_at=one_interval_ago,
+                                       total_run_count=0)
+        e = self.Entry(m, app=self.app)
+        isdue, delay = e.is_due()
+        assert isdue
+        assert delay == interval
+
+        m2 = self.create_model_interval(schedule(timedelta(seconds=interval)),
+                                        one_off=True,
+                                        last_run_at=one_interval_ago,
+                                        total_run_count=1)
+        e2 = self.Entry(m2, app=self.app)
+        isdue, delay = e2.is_due()
+        assert not isdue
+        assert delay is None
+
 
 @pytest.mark.django_db()
 class test_DatabaseSchedulerFromAppConf(SchedulerCase):
@@ -143,7 +268,8 @@ class test_DatabaseSchedulerFromAppConf(SchedulerCase):
 
         self.entry_name, entry = self.create_conf_entry()
         self.app.conf.beat_schedule = {self.entry_name: entry}
-        self.m1 = PeriodicTask(name=self.entry_name)
+        self.m1 = PeriodicTask(name=self.entry_name,
+                               interval=self.create_interval_schedule())
 
     def test_constructor(self):
         s = self.Scheduler(app=self.app)
@@ -160,6 +286,10 @@ class test_DatabaseSchedulerFromAppConf(SchedulerCase):
         assert self.entry_name in sched
         for n, e in sched.items():
             assert isinstance(e, s.Entry)
+            if n == 'celery.backend_cleanup':
+                assert e.options['expires'] == 12 * 3600
+                assert e.model.expires is None
+                assert e.model.expire_seconds == 12 * 3600
 
     def test_periodic_task_model_disabled_schedule(self):
         self.m1.enabled = False
@@ -203,6 +333,17 @@ class test_DatabaseScheduler(SchedulerCase):
         self.m4.save()
         self.m4.refresh_from_db()
 
+        dt_aware = make_aware(datetime(day=26,
+                                       month=7,
+                                       year=3000,
+                                       hour=1,
+                                       minute=0))  # future time
+        self.m6 = self.create_model_clocked(
+            clocked(dt_aware)
+        )
+        self.m6.save()
+        self.m6.refresh_from_db()
+
         # disabled, should not be in schedule
         m5 = self.create_model_interval(
             schedule(timedelta(seconds=1)))
@@ -219,7 +360,7 @@ class test_DatabaseScheduler(SchedulerCase):
     def test_all_as_schedule(self):
         sched = self.s.schedule
         assert sched
-        assert len(sched) == 5
+        assert len(sched) == 6
         assert 'celery.backend_cleanup' in sched
         for n, e in sched.items():
             assert isinstance(e, self.s.Entry)
@@ -357,23 +498,79 @@ class test_DatabaseScheduler(SchedulerCase):
         with pytest.raises(RuntimeError):
             self.s.sync()
 
+    def test_update_scheduler_heap_invalidation(self, monkeypatch):
+        # mock "schedule_changed" to always trigger update for
+        # all calls to schedule, as a change may occur at any moment
+        monkeypatch.setattr(self.s, 'schedule_changed', lambda: True)
+        self.s.tick()
+
+    def test_heap_size_is_constant(self, monkeypatch):
+        # heap size is constant unless the schedule changes
+        monkeypatch.setattr(self.s, 'schedule_changed', lambda: True)
+        expected_heap_size = len(self.s.schedule.values())
+        self.s.tick()
+        assert len(self.s._heap) == expected_heap_size
+        self.s.tick()
+        assert len(self.s._heap) == expected_heap_size
+
+    def test_scheduler_schedules_equality_on_change(self, monkeypatch):
+        monkeypatch.setattr(self.s, 'schedule_changed', lambda: False)
+        assert self.s.schedules_equal(self.s.schedule, self.s.schedule)
+
+        monkeypatch.setattr(self.s, 'schedule_changed', lambda: True)
+        assert not self.s.schedules_equal(self.s.schedule, self.s.schedule)
+
+    def test_heap_always_return_the_first_item(self):
+        interval = 10
+
+        s1 = schedule(timedelta(seconds=interval))
+        m1 = self.create_model_interval(s1, enabled=False)
+        m1.last_run_at = self.app.now() - timedelta(seconds=interval + 2)
+        m1.save()
+        m1.refresh_from_db()
+
+        s2 = schedule(timedelta(seconds=interval))
+        m2 = self.create_model_interval(s2, enabled=True)
+        m2.last_run_at = self.app.now() - timedelta(seconds=interval + 1)
+        m2.save()
+        m2.refresh_from_db()
+
+        e1 = EntryTrackSave(m1, self.app)
+        # because the disabled task e1 runs first, e2 will never be executed
+        e2 = EntryTrackSave(m2, self.app)
+
+        s = self.Scheduler(app=self.app)
+        s.schedule.clear()
+        s.schedule[e1.name] = e1
+        s.schedule[e2.name] = e2
+
+        tried = set()
+        for _ in range(len(s.schedule) * 8):
+            tick_interval = s.tick()
+            if tick_interval and tick_interval > 0.0:
+                tried.add(s._heap[0].entry.name)
+                time.sleep(tick_interval)
+                if s.should_sync():
+                    s.sync()
+        assert len(tried) == 1 and tried == set([e1.name])
+
 
 @pytest.mark.django_db()
 class test_models(SchedulerCase):
 
     def test_IntervalSchedule_unicode(self):
-        assert (text_t(IntervalSchedule(every=1, period='seconds')) ==
-                'every second')
-        assert (text_t(IntervalSchedule(every=10, period='seconds')) ==
-                'every 10 seconds')
+        assert (str(IntervalSchedule(every=1, period='seconds'))
+                == 'every second')
+        assert (str(IntervalSchedule(every=10, period='seconds'))
+                == 'every 10 seconds')
 
     def test_CrontabSchedule_unicode(self):
-        assert text_t(CrontabSchedule(
+        assert str(CrontabSchedule(
             minute=3,
             hour=3,
             day_of_week=None,
         )) == '3 3 * * * (m/h/d/dM/MY) UTC'
-        assert text_t(CrontabSchedule(
+        assert str(CrontabSchedule(
             minute=3,
             hour=3,
             day_of_week='tue',
@@ -383,14 +580,14 @@ class test_models(SchedulerCase):
 
     def test_PeriodicTask_unicode_interval(self):
         p = self.create_model_interval(schedule(timedelta(seconds=10)))
-        assert text_t(p) == '{0}: every 10.0 seconds'.format(p.name)
+        assert str(p) == '{0}: every 10.0 seconds'.format(p.name)
 
     def test_PeriodicTask_unicode_crontab(self):
         p = self.create_model_crontab(crontab(
             hour='4, 5',
             day_of_week='4, 5',
         ))
-        assert text_t(p) == """{0}: * 4,5 4,5 * * (m/h/d/dM/MY) UTC""".format(
+        assert str(p) == """{0}: * 4,5 4,5 * * (m/h/d/dM/MY) UTC""".format(
             p.name
         )
 
@@ -398,8 +595,17 @@ class test_models(SchedulerCase):
         p = self.create_model_solar(
             solar('solar_noon', 48.06, 12.86), name='solar_event'
         )
-        assert text_t(p) == 'solar_event: {0} ({1}, {2})'.format(
+        assert str(p) == 'solar_event: {0} ({1}, {2})'.format(
             'solar_noon', '48.06', '12.86'
+        )
+
+    def test_PeriodicTask_unicode_clocked(self):
+        time = make_aware(datetime.now())
+        p = self.create_model_clocked(
+            clocked(time), name='clocked_event'
+        )
+        assert str(p) == '{0}: {1} {2}'.format(
+            'clocked_event', str(time), True
         )
 
     def test_PeriodicTask_schedule_property(self):
@@ -422,7 +628,7 @@ class test_models(SchedulerCase):
 
     def test_PeriodicTask_unicode_no_schedule(self):
         p = self.create_model()
-        assert text_t(p) == '{0}: {{no schedule}}'.format(p.name)
+        assert str(p) == '{0}: {{no schedule}}'.format(p.name)
 
     def test_CrontabSchedule_schedule(self):
         s = CrontabSchedule(
@@ -480,6 +686,40 @@ class test_models(SchedulerCase):
         assert (nextcheck2 > 0) and (isdue2 is True) or \
             (nextcheck2 == s2.max_interval) and (isdue2 is False)
 
+    def test_ClockedSchedule_schedule(self):
+        due_datetime = make_aware(datetime(day=26,
+                                           month=7,
+                                           year=3000,
+                                           hour=1,
+                                           minute=0))  # future time
+        s = ClockedSchedule(clocked_time=due_datetime)
+        dt = datetime(day=25, month=7, year=2050, hour=1, minute=0)
+        dt_lastrun = make_aware(dt)
+
+        assert s.schedule is not None
+        isdue, nextcheck = s.schedule.is_due(dt_lastrun)
+        assert isdue is False  # False means task isn't due, but keep checking.
+        assert (nextcheck > 0) and (isdue is False) or \
+            (nextcheck == s.max_interval) and (isdue is True)
+
+        due_datetime = make_aware(datetime.now())
+        s = ClockedSchedule(clocked_time=due_datetime)
+        dt2_lastrun = make_aware(datetime.now())
+
+        assert s.schedule is not None
+        isdue2, nextcheck2 = s.schedule.is_due(dt2_lastrun)
+        assert isdue2 is True  # True means task is due and should run.
+        assert (nextcheck2 is None) and (isdue2 is True)
+        print(s.schedule.enabled)
+
+        assert s.schedule is not None
+        isdue3, nextcheck3 = s.schedule.is_due(dt2_lastrun)
+        print(s.schedule.clocked_time, s.schedule.enabled)
+        print(isdue3, nextcheck3)
+        # False means task isn't due, but keep checking.
+        assert isdue3 is False
+        assert (nextcheck3 is None) and (isdue3 is False)
+
 
 @pytest.mark.django_db()
 class test_model_PeriodicTasks(SchedulerCase):
@@ -506,15 +746,17 @@ class test_modeladmin_PeriodicTaskAdmin(SchedulerCase):
         self.site = AdminSite()
         self.request_factory = RequestFactory()
 
+        interval_schedule = self.create_interval_schedule()
+
         entry_name, entry = self.create_conf_entry()
         self.app.conf.beat_schedule = {entry_name: entry}
-        self.m1 = PeriodicTask(name=entry_name)
+        self.m1 = PeriodicTask(name=entry_name, interval=interval_schedule)
         self.m1.task = 'celery.backend_cleanup'
         self.m1.save()
 
         entry_name, entry = self.create_conf_entry()
         self.app.conf.beat_schedule = {entry_name: entry}
-        self.m2 = PeriodicTask(name=entry_name)
+        self.m2 = PeriodicTask(name=entry_name, interval=interval_schedule)
         self.m2.task = 'celery.backend_cleanup'
         self.m2.save()
 
@@ -525,6 +767,9 @@ class test_modeladmin_PeriodicTaskAdmin(SchedulerCase):
         setattr(request, '_messages', messages)
         return request
 
+    # don't hang if broker is down
+    # https://github.com/celery/celery/issues/4627
+    @pytest.mark.timeout(5)
     def test_run_task(self):
         ma = PeriodicTaskAdmin(PeriodicTask, self.site)
         self.request = self.patch_request(self.request_factory.get('/'))
@@ -533,6 +778,9 @@ class test_modeladmin_PeriodicTaskAdmin(SchedulerCase):
         queued_message = self.request._messages._queued_messages[0].message
         assert queued_message == '1 task was successfully run'
 
+    # don't hang if broker is down
+    # https://github.com/celery/celery/issues/4627
+    @pytest.mark.timeout(5)
     def test_run_tasks(self):
         ma = PeriodicTaskAdmin(PeriodicTask, self.site)
         self.request = self.patch_request(self.request_factory.get('/'))

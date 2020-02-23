@@ -3,16 +3,13 @@
 # :copyright: (c) 2016, Ask Solem.
 #             All rights reserved.
 # :license:   BSD (3 Clause), see LICENSE for more details.
-
-from __future__ import absolute_import, unicode_literals
-
 import re
 
 from collections import namedtuple
 
-__version__ = '1.1.1'
-__author__ = 'Ask Solem'
-__contact__ = 'ask@celeryproject.org'
+__version__ = '1.6.0'
+__author__ = 'Asif Saif Uddin, Ask Solem'
+__contact__ = 'auvipy@gmail.com, ask@celeryproject.org'
 __homepage__ = 'https://github.com/celery/django-celery-beat'
 __docformat__ = 'restructuredtext'
 
