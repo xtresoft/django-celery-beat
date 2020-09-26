@@ -2,7 +2,7 @@
 from datetime import timedelta
 
 import timezone_field
-from celery import schedules
+from celery import schedules, current_app
 from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -30,12 +30,35 @@ PERIOD_CHOICES = (
     (MICROSECONDS, _('Microseconds')),
 )
 
+SINGULAR_PERIODS = (
+    (DAYS, _('Day')),
+    (HOURS, _('Hour')),
+    (MINUTES, _('Minute')),
+    (SECONDS, _('Second')),
+    (MICROSECONDS, _('Microsecond')),
+)
+
 SOLAR_SCHEDULES = [(x, _(x)) for x in sorted(schedules.solar._all_events)]
 
 
 def cronexp(field):
     """Representation of cron expression."""
     return field and str(field).replace(' ', '') or '*'
+
+
+def crontab_schedule_celery_timezone():
+    """Return timezone string from Django settings `CELERY_TIMEZONE` variable.
+
+    If is not defined or is not a valid timezone, return `"UTC"` instead.
+    """
+    try:
+        CELERY_TIMEZONE = getattr(
+            settings, '%s_TIMEZONE' % current_app.namespace)
+    except AttributeError:
+        return 'UTC'
+    return CELERY_TIMEZONE if CELERY_TIMEZONE in [
+        choice[0].zone for choice in timezone_field.TimeZoneField.CHOICES
+    ] else 'UTC'
 
 
 class SolarSchedule(models.Model):
@@ -153,9 +176,18 @@ class IntervalSchedule(models.Model):
             return cls(every=every, period=period)
 
     def __str__(self):
+        readable_period = None
         if self.every == 1:
-            return _('every {0.period_singular}').format(self)
-        return _('every {0.every} {0.period}').format(self)
+            for period, _readable_period in SINGULAR_PERIODS:
+                if period == self.period:
+                    readable_period = _readable_period.lower()
+                    break
+            return _('every {}').format(readable_period)
+        for period, _readable_period in PERIOD_CHOICES:
+            if period == self.period:
+                readable_period = _readable_period.lower()
+                break
+        return _('every {} {}').format(self.every, readable_period)
 
     @property
     def period_singular(self):
@@ -169,12 +201,6 @@ class ClockedSchedule(models.Model):
         verbose_name=_('Clock Time'),
         help_text=_('Run the task at clocked time'),
     )
-    enabled = models.BooleanField(
-        default=True,
-        editable=False,
-        verbose_name=_('Enabled'),
-        help_text=_('Set to False to disable the schedule'),
-    )
 
     class Meta:
         """Table information."""
@@ -184,18 +210,16 @@ class ClockedSchedule(models.Model):
         ordering = ['clocked_time']
 
     def __str__(self):
-        return '{} {}'.format(self.clocked_time, self.enabled)
+        return '{}'.format(self.clocked_time)
 
     @property
     def schedule(self):
-        c = clocked(clocked_time=self.clocked_time,
-                    enabled=self.enabled, model=self)
+        c = clocked(clocked_time=self.clocked_time)
         return c
 
     @classmethod
     def from_schedule(cls, schedule):
-        spec = {'clocked_time': schedule.clocked_time,
-                'enabled': schedule.enabled}
+        spec = {'clocked_time': schedule.clocked_time}
         try:
             return cls.objects.get(**spec)
         except cls.DoesNotExist:
@@ -260,10 +284,10 @@ class CrontabSchedule(models.Model):
     )
 
     timezone = timezone_field.TimeZoneField(
-        default='UTC',
+        default=crontab_schedule_celery_timezone,
         verbose_name=_('Cron Timezone'),
         help_text=_(
-            'Timezone to Run the Cron Schedule on.  Default is UTC.'),
+            'Timezone to Run the Cron Schedule on. Default is UTC.'),
     )
 
     class Meta:
@@ -275,10 +299,10 @@ class CrontabSchedule(models.Model):
                     'day_of_week', 'hour', 'minute', 'timezone']
 
     def __str__(self):
-        return '{0} {1} {2} {3} {4} (m/h/d/dM/MY) {5}'.format(
+        return '{0} {1} {2} {3} {4} (m/h/dM/MY/d) {5}'.format(
             cronexp(self.minute), cronexp(self.hour),
-            cronexp(self.day_of_week), cronexp(self.day_of_month),
-            cronexp(self.month_of_year), str(self.timezone)
+            cronexp(self.day_of_month), cronexp(self.month_of_year),
+            cronexp(self.day_of_week), str(self.timezone)
         )
 
     @property
@@ -519,11 +543,10 @@ class PeriodicTask(models.Model):
                                    if getattr(self, s)]
 
         if len(selected_schedule_types) == 0:
-            raise ValidationError({
-                'interval': [
-                    'One of clocked, interval, crontab, or solar must be set.'
-                ]
-            })
+            raise ValidationError(
+                'One of clocked, interval, crontab, or solar '
+                'must be set.'
+            )
 
         err_msg = 'Only one of clocked, interval, crontab, '\
             'or solar must be set'

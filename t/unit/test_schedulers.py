@@ -21,7 +21,7 @@ from django_celery_beat.models import (
     PeriodicTask, PeriodicTasks, IntervalSchedule, CrontabSchedule,
     SolarSchedule, ClockedSchedule, DAYS
 )
-from django_celery_beat.utils import make_aware
+from django_celery_beat.utils import make_aware, NEVER_CHECK_TIMEOUT
 
 _ids = count(0)
 
@@ -180,6 +180,40 @@ class test_ModelEntry(SchedulerCase):
 
     @override_settings(
         USE_TZ=False,
+        DJANGO_CELERY_BEAT_TZ_AWARE=False
+    )
+    @pytest.mark.usefixtures('depends_on_current_app')
+    @timezone.override('Europe/Berlin')
+    @pytest.mark.celery(timezone='Europe/Berlin')
+    def test_entry_and_model_last_run_at_with_utc_no_use_tz(self, monkeypatch):
+        old_tz = os.environ.get("TZ")
+        os.environ["TZ"] = "Europe/Berlin"
+        if hasattr(time, "tzset"):
+            time.tzset()
+        assert self.app.timezone.zone == 'Europe/Berlin'
+        # simulate last_run_at from DB - not TZ aware but localtime
+        right_now = datetime.utcnow()
+        # make sure to use fixed date time
+        monkeypatch.setattr(self.Entry, '_default_now', lambda o: right_now)
+        m = self.create_model_crontab(
+            crontab(minute='*/10')
+        )
+        m.save()
+        e = self.Entry(m, app=self.app)
+        e.save()
+        m.refresh_from_db()
+
+        assert m.last_run_at == e.last_run_at
+
+        if old_tz is not None:
+            os.environ["TZ"] = old_tz
+        else:
+            del os.environ["TZ"]
+        if hasattr(time, "tzset"):
+            time.tzset()
+
+    @override_settings(
+        USE_TZ=False,
         DJANGO_CELERY_BEAT_TZ_AWARE=False,
         TIME_ZONE="Europe/Berlin",
         CELERY_TIMEZONE="America/New_York"
@@ -254,7 +288,7 @@ class test_ModelEntry(SchedulerCase):
         e2 = self.Entry(m2, app=self.app)
         isdue, delay = e2.is_due()
         assert not isdue
-        assert delay is None
+        assert delay == NEVER_CHECK_TIMEOUT
 
 
 @pytest.mark.django_db()
@@ -569,14 +603,14 @@ class test_models(SchedulerCase):
             minute=3,
             hour=3,
             day_of_week=None,
-        )) == '3 3 * * * (m/h/d/dM/MY) UTC'
+        )) == '3 3 * * * (m/h/dM/MY/d) UTC'
         assert str(CrontabSchedule(
             minute=3,
             hour=3,
             day_of_week='tue',
             day_of_month='*/2',
             month_of_year='4,6',
-        )) == '3 3 tue */2 4,6 (m/h/d/dM/MY) UTC'
+        )) == '3 3 */2 4,6 tue (m/h/dM/MY/d) UTC'
 
     def test_PeriodicTask_unicode_interval(self):
         p = self.create_model_interval(schedule(timedelta(seconds=10)))
@@ -587,7 +621,7 @@ class test_models(SchedulerCase):
             hour='4, 5',
             day_of_week='4, 5',
         ))
-        assert str(p) == """{0}: * 4,5 4,5 * * (m/h/d/dM/MY) UTC""".format(
+        assert str(p) == """{0}: * 4,5 * * 4,5 (m/h/dM/MY/d) UTC""".format(
             p.name
         )
 
@@ -604,8 +638,8 @@ class test_models(SchedulerCase):
         p = self.create_model_clocked(
             clocked(time), name='clocked_event'
         )
-        assert str(p) == '{0}: {1} {2}'.format(
-            'clocked_event', str(time), True
+        assert str(p) == '{0}: {1}'.format(
+            'clocked_event', str(time)
         )
 
     def test_PeriodicTask_schedule_property(self):
@@ -709,16 +743,7 @@ class test_models(SchedulerCase):
         assert s.schedule is not None
         isdue2, nextcheck2 = s.schedule.is_due(dt2_lastrun)
         assert isdue2 is True  # True means task is due and should run.
-        assert (nextcheck2 is None) and (isdue2 is True)
-        print(s.schedule.enabled)
-
-        assert s.schedule is not None
-        isdue3, nextcheck3 = s.schedule.is_due(dt2_lastrun)
-        print(s.schedule.clocked_time, s.schedule.enabled)
-        print(isdue3, nextcheck3)
-        # False means task isn't due, but keep checking.
-        assert isdue3 is False
-        assert (nextcheck3 is None) and (isdue3 is False)
+        assert (nextcheck2 == NEVER_CHECK_TIMEOUT) and (isdue2 is True)
 
 
 @pytest.mark.django_db()

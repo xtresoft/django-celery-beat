@@ -1,14 +1,14 @@
-# French translation strings for django-celery-beat.
+# Spanish translation strings for django-celery-beat.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# <flow.gunso@gmail.com>, 2019.
+# <mondejar1994@gmail.com>, 2020.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-02-26 13:14+0100\n"
+"POT-Creation-Date: 2019-11-10 14:36+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,256 +20,254 @@ msgstr ""
 
 #: django_celery_beat/admin.py:71
 msgid "Task (registered)"
-msgstr "Tâche (enregistrée)"
+msgstr "Tarea (registrada)"
 
 #: django_celery_beat/admin.py:75
 msgid "Task (custom)"
-msgstr "Tâche (personalisée)"
+msgstr "Tarea (personalizada)"
 
 #: django_celery_beat/admin.py:92
 msgid "Need name of task"
-msgstr "Besoin du nom de la tâche"
+msgstr "Nombre de tarea necesario"
 
 #: django_celery_beat/admin.py:98
 #: django_celery_beat/models.py:583
 msgid "Only one can be set, in expires and expire_seconds"
-msgstr "Seulement un peu être définie, soit expires ou expire_seconds"
+msgstr ""
+"Sólo uno de los campos puede ser definido, en expiración y segundos de "
+"expiración"
 
 #: django_celery_beat/admin.py:108
 #, python-format
 msgid "Unable to parse JSON: %s"
-msgstr "Incapable d'analyser le JSON: %s"
+msgstr "Incapaz de parsear el JSON: %s"
 
 #: django_celery_beat/admin.py:174
 #, python-brace-format
 msgid "{0} task{1} {2} successfully {3}"
-msgstr "{0} tâche{1} {2} avec succès {3}"
+msgstr "{0} tarea{1} {2} correctamente {3}"
 
 #: django_celery_beat/admin.py:177
 #: django_celery_beat/admin.py:239
 msgid "was,were"
-msgstr "a été,ont été"
+msgstr "fue,fueron"
 
 #: django_celery_beat/admin.py:186
 msgid "Enable selected tasks"
-msgstr "Active les tâches sélectionnées"
+msgstr "Habilitar tareas seleccionadas"
 
 #: django_celery_beat/admin.py:192
 msgid "Disable selected tasks"
-msgstr "Désactive les tâches sélectionnées"
+msgstr "Deshabilitar tareas seleccionadas"
 
 #: django_celery_beat/admin.py:204
 msgid "Toggle activity of selected tasks"
-msgstr "Bascule l'activité des tâches sélectionnées"
+msgstr "Conmutar actividad de las tareas seleccionadas"
 
 #: django_celery_beat/admin.py:224
 #, python-brace-format
 msgid "task \"{0}\" not found"
-msgstr "tâche \"{0}\" introuvable"
+msgstr "Tarea \"{0}\" no encontrada"
 
 #: django_celery_beat/admin.py:236
 #, python-brace-format
 msgid "{0} task{1} {2} successfully run"
-msgstr "{0} tâche{1} {2} a fonctionnée avec succès"
+msgstr "{0} tarea{1} {2} correctamente ejecutadas"
 
 #: django_celery_beat/admin.py:242
 msgid "Run selected tasks"
-msgstr "Démarre les tâches sélectionnées"
+msgstr "Ejecutar tareas seleccionadas"
 
 #: django_celery_beat/apps.py:15
 msgid "Periodic Tasks"
-msgstr "Tâches Périodique"
+msgstr "Tareas Periódicas"
 
 #: django_celery_beat/models.py:29
 msgid "Days"
-msgstr "Jours"
+msgstr "Días"
 
 #: django_celery_beat/models.py:30
 msgid "Hours"
-msgstr "Heures"
+msgstr "Horas"
 
 #: django_celery_beat/models.py:31
 msgid "Minutes"
-msgstr "Minutes"
+msgstr "Minutos"
 
 #: django_celery_beat/models.py:32
 msgid "Seconds"
-msgstr "Secondes"
+msgstr "Segundos"
 
 #: django_celery_beat/models.py:33
 msgid "Microseconds"
-msgstr "Microsecondes"
+msgstr "Microsegundos"
 
 #: django_celery_beat/models.py:38
 msgid "Day"
-msgstr "Jour"
+msgstr "Día"
 
 #: django_celery_beat/models.py:39
 msgid "Hour"
-msgstr "Heure"
+msgstr "Hora"
 
 #: django_celery_beat/models.py:40
 msgid "Minute"
-msgstr "Minute"
+msgstr "Minuto"
 
 #: django_celery_beat/models.py:41
 msgid "Second"
-msgstr "Seconde"
+msgstr "Segundo"
 
 #: django_celery_beat/models.py:42
 msgid "Microsecond"
-msgstr "Microseconde"
+msgstr "Microsegundo"
 
 #: django_celery_beat/models.py:63
 msgid "Solar Event"
-msgstr "Évènement Solaire"
+msgstr "Evento Solar"
 
 #: django_celery_beat/models.py:64
 msgid "The type of solar event when the job should run"
-msgstr "Le type d'évènement solaire pour lequel la tâche devrait démarrer"
+msgstr "El tipo de evento solar cuando el proceso debe ejecutarse"
 
 #: django_celery_beat/models.py:68
 msgid "Latitude"
-msgstr "Latitude"
+msgstr "Latitud"
 
 #: django_celery_beat/models.py:69
 msgid "Run the task when the event happens at this latitude"
-msgstr "Démarre cette tâche lorsque l'évènement se produit à cette latitude"
+msgstr "Ejecutar la tarea cuando el evento ocurra a esta latitud"
 
 #: django_celery_beat/models.py:74
 msgid "Longitude"
-msgstr "Longitude"
+msgstr "Longitud"
 
 #: django_celery_beat/models.py:75
 msgid "Run the task when the event happens at this longitude"
-msgstr ""
-"Démarre cette tâche lorsque cette évènement se produit à cette longitude"
+msgstr "Ejecutar la tarea cuando el evento ocurra a esta longitud"
 
 #: django_celery_beat/models.py:82
 msgid "solar event"
-msgstr "évènement solaire"
+msgstr "evento solar"
 
 #: django_celery_beat/models.py:83
 msgid "solar events"
-msgstr "évènements solaire"
+msgstr "eventos solares"
 
 #: django_celery_beat/models.py:133
 msgid "Number of Periods"
-msgstr "Nombre de Périodes"
+msgstr "Número de Períodos"
 
 #: django_celery_beat/models.py:134
 msgid "Number of interval periods to wait before running the task again"
 msgstr ""
-"Nombre d'intervale de périodes à attendre avant de démarrer la tâche à "
-"nouveau"
+"Número de períodos de intervalo a esperar antes de ejecutar esta tarea de "
+"nuevo"
 
 #: django_celery_beat/models.py:140
 msgid "Interval Period"
-msgstr "Période d'Intervale"
+msgstr "Período de intervalo"
 
 #: django_celery_beat/models.py:141
 msgid "The type of period between task runs (Example: days)"
-msgstr "Le type de période entre chaque démarrage de tâche (Exemple: jours)"
+msgstr "El tipo de período entre ejecuciones de tarea (Ejemplo: días) "
 
 #: django_celery_beat/models.py:147
 msgid "interval"
-msgstr "intervale"
+msgstr "intervalo"
 
 #: django_celery_beat/models.py:148
 msgid "intervals"
-msgstr "intervales"
+msgstr "intervalos"
 
 #: django_celery_beat/models.py:177
 msgid "every {}"
-msgstr "chaque {}"
+msgstr "cada {}"
 
 #: django_celery_beat/models.py:183
 msgid "every {} {}"
-msgstr "chaque {} {}"
+msgstr "cada {} {}"
 
 #: django_celery_beat/models.py:195
 msgid "Clock Time"
-msgstr "Horaire"
+msgstr "Hora y día"
 
 #: django_celery_beat/models.py:196
 msgid "Run the task at clocked time"
-msgstr "Démarre la tâche à l'horaire définie"
+msgstr "Ejecuta la tarea en el momento indicado"
 
 #: django_celery_beat/models.py:201
 #: django_celery_beat/models.py:503
 msgid "Enabled"
-msgstr "Activée"
+msgstr "Habilitada"
 
 #: django_celery_beat/models.py:202
 #: django_celery_beat/models.py:504
 msgid "Set to False to disable the schedule"
-msgstr "Mettre à Faux pour désactiver la planification"
+msgstr "Establece a Falso para deshabilitar la programación"
 
 #: django_celery_beat/models.py:208
 #: django_celery_beat/models.py:209
 msgid "clocked"
-msgstr "horaire"
+msgstr "cronometrado"
 
 #: django_celery_beat/models.py:252
 msgid "Minute(s)"
-msgstr "Minute⋅s"
+msgstr "Minuto(s)"
 
 #: django_celery_beat/models.py:254
 msgid "Cron Minutes to Run. Use \"*\" for \"all\". (Example: \"0,30\")"
 msgstr ""
-"Minutes Cron pour Démarrer. Utilisez \"*\" pour \"toutes\". (Exemple: "
-"\"0,30\")"
+"Minutos Cron cuando ejecutar. Usa \"*\" para \"todos\". (Ejemplo: \"0,30\")"
 
 #: django_celery_beat/models.py:259
 msgid "Hour(s)"
-msgstr "Heure⋅s"
+msgstr "Hora(s)"
 
 #: django_celery_beat/models.py:261
 msgid "Cron Hours to Run. Use \"*\" for \"all\". (Example: \"8,20\")"
 msgstr ""
-"Heures Cron pour Démarrer. Utilisez \"*\" pour \"toutes\". (Exemple: "
-"\"8,20\")"
+"Horas Cron cuando ejecutar. Usa \"*\" para \"todas\". (Ejemplo: \"8,20\")"
 
 #: django_celery_beat/models.py:266
 msgid "Day(s) Of The Week"
-msgstr "Jour⋅s De La Semaine"
+msgstr "Día(s) de la semana"
 
 #: django_celery_beat/models.py:268
 msgid "Cron Days Of The Week to Run. Use \"*\" for \"all\". (Example: \"0,5\")"
 msgstr ""
-"Jours De La Semaine Cron pour Démarrer. Utilisez \"*\" pour \"tous\". "
-"(Exemple: \"0,5\")"
+"Días de la semana Cron cuando ejecutar. Usa \"*\" para \"todos\". (Ejemplo: "
+"\"0,5\")"
 
 #: django_celery_beat/models.py:274
 msgid "Day(s) Of The Month"
-msgstr "Jour⋅s Du Mois"
+msgstr "Día(s) del mes"
 
 #: django_celery_beat/models.py:276
 msgid ""
 "Cron Days Of The Month to Run. Use \"*\" for \"all\". (Example: \"1,15\")"
 msgstr ""
-"Jours Du Mois Cron pour Démarrer. Utilisez \"*\" pour \"tous\". (Exemple: "
+"Días del mes Cron cuando ejecutar. Usa \"*\" para \"todos\". (Ejemplo: "
 "\"1,15\")"
 
 #: django_celery_beat/models.py:282
 msgid "Month(s) Of The Year"
-msgstr "Mois De L'Année"
+msgstr "Mes(es) del año"
 
 #: django_celery_beat/models.py:284
 msgid ""
 "Cron Months Of The Year to Run. Use \"*\" for \"all\". (Example: \"0,6\")"
 msgstr ""
-"Mois De L'Année Cron pour Démarrer. Utilisez \"*\" pour \"tous\". (Exemple:"
-" ,6\")"
+"Meses del año Cron cuando ejecutar. Usa \"*\" para \"todos\". (Ejemplo: "
+"\"0,6\")"
 
 #: django_celery_beat/models.py:291
 msgid "Cron Timezone"
-msgstr "Fuseau Horaire Cron"
+msgstr "Zona horaria Cron"
 
 #: django_celery_beat/models.py:293
 msgid "Timezone to Run the Cron Schedule on. Default is UTC."
-msgstr ""
-"Fuseau Horaire pour lequel démarrer la planification Cron. UTC par défaut."
+msgstr "Zona horaria donde ejecutar la programación Cron. Por defecto UTC."
 
 #: django_celery_beat/models.py:299
 msgid "crontab"
@@ -281,211 +279,215 @@ msgstr "crontabs"
 
 #: django_celery_beat/models.py:386
 msgid "Name"
-msgstr "Nom"
+msgstr "Nombre"
 
 #: django_celery_beat/models.py:387
 msgid "Short Description For This Task"
-msgstr "Description Courte Pour Cette Tâche"
+msgstr "Descripción corta para esta tarea"
 
 #: django_celery_beat/models.py:392
 msgid ""
 "The Name of the Celery Task that Should be Run.  (Example: \"proj.tasks."
 "import_contacts\")"
 msgstr ""
-"Le Nom de la Tâche Celery qui devrait être démarrée.  (Exemple: \"proj.tasks."
+"Nombre de la tarea Celery que debe ser ejecutada. (Ejemplo: \"proj.tasks."
 "import_contacts\")"
 
 #: django_celery_beat/models.py:400
 msgid "Interval Schedule"
-msgstr "Planification intervalée"
+msgstr "Intervalo de programación"
 
 #: django_celery_beat/models.py:401
 msgid ""
 "Interval Schedule to run the task on.  Set only one schedule type, leave the "
 "others null."
 msgstr ""
-"Planification intervalée pour démarrer cette tâche. Ne mettez qu'un seul "
-"type de planification, laissez les autres vides"
+"Intervalo de programación donde ejecutar la tarea. Establece sólo un tipo de "
+"programación, deja el resto en blanco."
 
 #: django_celery_beat/models.py:406
 msgid "Crontab Schedule"
-msgstr "Planification Crontab"
+msgstr "Programación Crontab"
 
 #: django_celery_beat/models.py:407
 msgid ""
 "Crontab Schedule to run the task on.  Set only one schedule type, leave the "
 "others null."
 msgstr ""
-"Planification Crontab pour démarrer cette tâche. Ne mettez qu'un seul type "
-"de planification, laissez les autres vides"
+"Programación Crontab con la cual ejecutar la tarea. Establece sólo un tipo "
+"de programación, deja el resto en blanco."
 
 #: django_celery_beat/models.py:412
 msgid "Solar Schedule"
-msgstr "Planification Solaire"
+msgstr "Programación solar"
 
 #: django_celery_beat/models.py:413
 msgid ""
 "Solar Schedule to run the task on.  Set only one schedule type, leave the "
 "others null."
 msgstr ""
-"Planification Solaire pour démarrer cette tâche. Ne mettez qu'un seul type "
-"de planification, laissez les autres vides"
+"Programación solar con la cual ejecutar la tarea. Establece sólo un tipo de "
+"programación, deja el resto en blanco."
 
 #: django_celery_beat/models.py:418
 msgid "Clocked Schedule"
-msgstr "Planification Horaire"
+msgstr "Programación horaria"
 
 #: django_celery_beat/models.py:419
 msgid ""
 "Clocked Schedule to run the task on.  Set only one schedule type, leave the "
 "others null."
 msgstr ""
-"Planification Horaire pour démarrer cette tâche. Ne mettez qu'un seul type "
-"de planification, laissez les autres vides"
+"Programación horaria con la cual ejecutar la tarea. Establece sólo un tipo "
+"de programación, deja el resto en blanco."
 
 #: django_celery_beat/models.py:425
 msgid "Positional Arguments"
-msgstr "Arguments Positionnels"
+msgstr "Argumentos posicionales"
 
 #: django_celery_beat/models.py:427
 msgid "JSON encoded positional arguments (Example: [\"arg1\", \"arg2\"])"
-msgstr "Arguments positionnels encodés en JSON (Exemple: [\"arg1\", \"arg2\"])"
+msgstr ""
+"Argumentos posicionales codificados en formato JSON. (Ejemplo: [\"arg1\", "
+"\"arg2\"])"
 
 #: django_celery_beat/models.py:432
 msgid "Keyword Arguments"
-msgstr "Arguments Nommés"
+msgstr "Agumentos opcionales"
 
 #: django_celery_beat/models.py:434
 msgid "JSON encoded keyword arguments (Example: {\"argument\": \"value\"})"
-msgstr "Arguments nommés encodés en JSON (Exemple: {\"argument\": \"valeur\"})"
+msgstr ""
+"Argumentos opcionales codificados en formato JSON. (Ejemplo: {\"argument\": "
+"\"value\"})"
 
 #: django_celery_beat/models.py:440
 msgid "Queue Override"
-msgstr "Surcharge de file d'attente"
+msgstr "Invalidación de cola"
 
 #: django_celery_beat/models.py:442
 msgid "Queue defined in CELERY_TASK_QUEUES. Leave None for default queuing."
 msgstr ""
-"File d'attente définie dans CELERY_TASK_QEUEUS. Laissez Vide pour la mise en "
-"file d'attente par défaut."
+"Cola definida en CELERY_TASK_QUEUES. Dejala nula para la cola por defecto."
 
 #: django_celery_beat/models.py:451
 msgid "Exchange"
-msgstr "Échange"
+msgstr "Intercambio"
 
 #: django_celery_beat/models.py:452
 msgid "Override Exchange for low-level AMQP routing"
-msgstr "Surcharge d'échange pour un routage AMQP bas-niveau"
+msgstr "Invalida intercambio para enrutamiento de bajo nivel de AMQP"
 
 #: django_celery_beat/models.py:456
 msgid "Routing Key"
-msgstr "Clé de routage"
+msgstr "Clave de enrutamiento"
 
 #: django_celery_beat/models.py:457
 msgid "Override Routing Key for low-level AMQP routing"
-msgstr "Surcharge de clé de route pour un routage AMQP bas-niveau"
+msgstr ""
+"Invalida la clave de enrutamiento para enrutamiento de bajo nivel de AMQP"
 
 #: django_celery_beat/models.py:461
 msgid "AMQP Message Headers"
-msgstr "Message d'en-têtes AMQP"
+msgstr "Cabeceras de mensaje de AMQP"
 
 #: django_celery_beat/models.py:462
 msgid "JSON encoded message headers for the AMQP message."
-msgstr "Message d'en-têtes encodés en JSON pour le message AMQP"
+msgstr "Cacbeceras de mensaje de AMQP codificadas en formato JSON."
 
 #: django_celery_beat/models.py:468
 msgid "Priority"
-msgstr "Priorité"
+msgstr "Prioridad"
 
 #: django_celery_beat/models.py:470
 msgid ""
 "Priority Number between 0 and 255. Supported by: RabbitMQ, Redis (priority "
 "reversed, 0 is highest)."
 msgstr ""
-"Valeur de Priorité entre 0 et 255. Supporté par: RabbitMQ, Redis (priorité "
-"inversé, 0 est plus élevé)."
+"Número de prioridad entre 0 and 255. Soportado por: RabbitMQ, Redis "
+"(prioridad invertida, 0 es la más alta)."
 
 #: django_celery_beat/models.py:475
 msgid "Expires Datetime"
-msgstr "Date et heure d'expiration"
+msgstr "Fecha de caducidad"
 
 #: django_celery_beat/models.py:477
 msgid ""
 "Datetime after which the schedule will no longer trigger the task to run"
 msgstr ""
-"Date et heure après laquelle la planification ne déclenchera plus la tâche à "
-"démarrer"
+"Fecha después de la cual la programación no provocará que la tarea vuelva a "
+"ejecutarse"
 
 #: django_celery_beat/models.py:482
 msgid "Expires timedelta with seconds"
-msgstr "Différence de temps en secondes d'expiration"
+msgstr "timedelta de caducidad en segundos"
 
 #: django_celery_beat/models.py:484
 msgid ""
 "Timedelta with seconds which the schedule will no longer trigger the task to "
 "run"
 msgstr ""
-"Différence de temps en secondes à laquelle la planification ne déclenchera "
-"plus la tâche à démarrer"
+"timedelta en segundos después de los cuales la programación no provocará que "
+"la tarea vuelva a ejecutarse"
 
 #: django_celery_beat/models.py:490
 msgid "One-off Task"
-msgstr "Tâche Ponctuelle"
+msgstr "Tarea de ejecución única"
 
 #: django_celery_beat/models.py:492
 msgid "If True, the schedule will only run the task a single time"
-msgstr "Si Vrai, la planification ne démarrera la tâche qu'une seule fois"
+msgstr "Si es verdadera, la programación sólo lanzará la tarea una vez"
 
 #: django_celery_beat/models.py:496
 msgid "Start Datetime"
-msgstr "Date et heure de démarrage"
+msgstr "Fecha de comienzo"
 
 #: django_celery_beat/models.py:498
 msgid "Datetime when the schedule should begin triggering the task to run"
 msgstr ""
-"Date et heure à laquelle la planification devrait commencer à déclencher la "
-"tâche à démarrer"
+"Fecha cuando la programación debe comenzar a provocar la ejecución de la "
+"tarea"
 
 #: django_celery_beat/models.py:509
 msgid "Last Run Datetime"
-msgstr "Date et heure du dernier démarrage"
+msgstr "Fecha de última ejecución"
 
 #: django_celery_beat/models.py:511
 msgid ""
 "Datetime that the schedule last triggered the task to run. Reset to None if "
 "enabled is set to False."
 msgstr ""
-"Date et heure à laquelle la planification à dernièrement déclenchée la tâche "
-"à démarrer. Est remis à Vide si activé est mis à Faux"
+"Fecha en la cual la programación ejecutó la tarea por última vez. "
+"Reinicializa a None si enabled está establecido como falso."
 
 #: django_celery_beat/models.py:516
 msgid "Total Run Count"
-msgstr "Nombre Total de Démarrage"
+msgstr "Contador de ejecuciones totales"
 
 #: django_celery_beat/models.py:518
 msgid "Running count of how many times the schedule has triggered the task"
-msgstr "Compte combien de fois la planification a déclenchée la tâche"
+msgstr "Contador de cuentas veces ha sido ejecutada la tarea."
 
 #: django_celery_beat/models.py:523
 msgid "Last Modified"
-msgstr "Dernière modification"
+msgstr "Última modificación"
 
 #: django_celery_beat/models.py:524
 msgid "Datetime that this PeriodicTask was last modified"
-msgstr "Date et heure de la dernière modification de cette Tâche Périodique"
+msgstr "Fecha en la cual esta tarea periódica fue modificada por última vez"
 
 #: django_celery_beat/models.py:528
 msgid "Description"
-msgstr "Description"
+msgstr "Descripción"
 
 #: django_celery_beat/models.py:530
 msgid "Detailed description about the details of this Periodic Task"
-msgstr "Description détaillée à propos des détails de cette Tâche Périodique"
+msgstr "Descripción detallada sobre los detalles de esta tarea periódica"
 
 #: django_celery_beat/models.py:539
 msgid "periodic task"
-msgstr "tâche périodiuqe"
+msgstr "tarea periódica"
 
 #: django_celery_beat/models.py:540
 msgid "periodic tasks"
-msgstr "tâches périodique"
+msgstr "tareas periódicas"

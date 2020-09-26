@@ -4,7 +4,7 @@
 
 |build-status| |coverage| |license| |wheel| |pyversion| |pyimp|
 
-:Version: 1.6.0
+:Version: 2.0.0
 :Web: http://django-celery-beat.readthedocs.io/
 :Download: http://pypi.python.org/pypi/django-celery-beat
 :Source: http://github.com/celery/django-celery-beat
@@ -23,10 +23,7 @@ Using the Extension
 ===================
 
 Usage and installation instructions for this extension are available
-from the `Celery documentation`_:
-
-http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html#using-custom-scheduler-classes
-
+from the `Celery documentation`_.
 
 .. _`Celery documentation`:
     http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html#using-custom-scheduler-classes
@@ -82,7 +79,7 @@ If you update periodic tasks in bulk, you will need to update the counter
 manually::
 
     >>> from django_celery_beat.models import PeriodicTasks
-    >>> PeriodicTasks.changed()
+    >>> PeriodicTasks.update_changed()
 
 Example creating interval-based periodic task
 ---------------------------------------------
@@ -303,23 +300,25 @@ If you have a project that is time zone naive, you can set ``DJANGO_CELERY_BEAT_
 .. |coverage| image:: https://codecov.io/github/celery/django-celery-beat/coverage.svg?branch=master
     :target: https://codecov.io/github/celery/django-celery-beat?branch=master
 
-.. |license| image:: https://img.shields.io/pypi/l/django-celery-beat.svg
+.. |license| image:: https://img.shields.io/pypi/l/django-celery-beat.svg#foo
     :alt: BSD License
     :target: https://opensource.org/licenses/BSD-3-Clause
 
-.. |wheel| image:: https://img.shields.io/pypi/wheel/django-celery-beat.svg
+.. |wheel| image:: https://img.shields.io/pypi/wheel/django-celery-beat.svg#foo
     :alt: django-celery-beat can be installed via wheel
     :target: http://pypi.python.org/pypi/django-celery-beat/
 
-.. |pyversion| image:: https://img.shields.io/pypi/pyversions/django-celery-beat.svg
+.. |pyversion| image:: https://img.shields.io/pypi/pyversions/django-celery-beat.svg#foo
     :alt: Supported Python versions.
     :target: http://pypi.python.org/pypi/django-celery-beat/
 
-.. |pyimp| image:: https://img.shields.io/pypi/implementation/django-celery-beat.svg
+.. |pyimp| image:: https://img.shields.io/pypi/implementation/django-celery-beat.svg#foo
     :alt: Support Python implementations.
     :target: http://pypi.python.org/pypi/django-celery-beat/
 
 django-celery-beat as part of the Tidelift Subscription
--------------
+-------------------------------------------------------
 
-The maintainers of django-celery-beat and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source dependencies you use to build your applications. Save time, reduce risk, and improve code health, while paying the maintainers of the exact dependencies you use. [Learn more.](https://tidelift.com/subscription/pkg/pypi-django-celery-beat?utm_source=pypi-django-celery-beat&utm_medium=referral&utm_campaign=readme&utm_term=repo)
+The maintainers of django-celery-beat and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source dependencies you use to build your applications. Save time, reduce risk, and improve code health, while paying the maintainers of the exact dependencies you use. `Learn more`_.
+
+.. _Learn more: https://tidelift.com/subscription/pkg/pypi-django-celery-beat?utm_source=pypi-django-celery-beat&utm_medium=referral&utm_campaign=readme&utm_term=repo

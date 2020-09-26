@@ -24,6 +24,7 @@ from .models import (
     SolarSchedule, ClockedSchedule
 )
 from .clockedschedule import clocked
+from .utils import NEVER_CHECK_TIMEOUT
 
 try:
     from celery.utils.time import is_naive
@@ -128,7 +129,8 @@ class ModelEntry(ScheduleEntry):
             self.model.total_run_count = 0  # Reset
             self.model.no_changes = False  # Mark the model entry as changed
             self.model.save()
-            return schedules.schedstate(False, None)  # Don't recheck
+            # Don't recheck
+            return schedules.schedstate(False, NEVER_CHECK_TIMEOUT)
 
         # CAUTION: make_aware assumes settings.TIME_ZONE for naive datetimes,
         # while maybe_make_aware assumes utc for naive datetimes
@@ -162,9 +164,6 @@ class ModelEntry(ScheduleEntry):
         obj = type(self.model)._default_manager.get(pk=self.model.pk)
         for field in self.save_fields:
             setattr(obj, field, getattr(self.model, field))
-
-        if not getattr(settings, 'DJANGO_CELERY_BEAT_TZ_AWARE', True):
-            obj.last_run_at = datetime.datetime.now()
 
         obj.save()
 
@@ -293,7 +292,8 @@ class DatabaseScheduler(Scheduler):
         return new_entry
 
     def sync(self):
-        info('Writing entries...')
+        if logger.isEnabledFor(logging.DEBUG):
+            debug('Writing entries...')
         _tried = set()
         _failed = set()
         try:
